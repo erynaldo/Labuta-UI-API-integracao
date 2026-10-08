@@ -1,0 +1,20 @@
+# Pasta de distribuição/build
+dist/
+
+# Dependências
+node_modules/
+
+# Arquivos padrão do Sistema Operacional
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Arquivos de log
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variáveis de ambiente e segredos
+.env
+.env.local

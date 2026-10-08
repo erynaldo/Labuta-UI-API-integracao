@@ -1,0 +1,5 @@
+import { Hammer } from "lucide-react";
+
+export type Page = "home" | "cadastro" | "login" | "admin-login";
+
+export function SiteFooter({ navigate }: { navigate: (p: Page) => void }) { return <footer className="bg-[#1D4ED8] text-white mt-auto"><div className="max-w-6xl mx-auto px-6 py-10"><div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6"><div><div className="flex items-center gap-2 mb-2"><Hammer className="w-5 h-5" /><span className="font-bold text-lg">Labuta</span></div><p className="text-blue-200 text-sm">Conectando profissionais a oportunidades.</p></div><div className="flex flex-wrap gap-6 text-sm text-blue-200"><a href="#">Termos de Uso</a><a href="#">Privacidade</a><button onClick={() => navigate("admin-login")} className="text-blue-300/50 hover:text-blue-200 transition-colors text-sm cursor-pointer">Área Administrativa</button></div></div><div className="border-t border-blue-600 mt-8 pt-6 text-blue-300 text-xs">© 2026 Labuta. Todos os direitos reservados.</div></div></footer>; }

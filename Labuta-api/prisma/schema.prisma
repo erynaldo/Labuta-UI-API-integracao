@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CLIENT
+  PROFESSIONAL
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum DocumentType {
+  CPF
+  CNPJ
+}
+
+enum RequestKind {
+  QUOTE
+  SERVICE
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+model User {
+  id                    String             @id @default(uuid()) @db.Uuid
+  name                  String             @db.VarChar(120)
+  email                 String             @unique @db.VarChar(254)
+  phone                 String             @db.VarChar(20)
+  city                  String             @db.VarChar(100)
+  cpf                   String?            @unique @db.VarChar(11)
+  passwordHash          String             @map("password_hash") @db.VarChar(255)
+  role                  UserRole           @default(CLIENT)
+  status                AccountStatus      @default(ACTIVE)
+  createdAt             DateTime           @default(now()) @map("created_at")
+  updatedAt             DateTime           @updatedAt @map("updated_at")
+  professionalProfile   ProfessionalProfile?
+  clientRequests        ServiceRequest[]   @relation("RequestClient")
+  sentMessages          Message[]          @relation("MessageSender")
+  receivedMessages      Message[]          @relation("MessageReceiver")
+  reviews               Review[]           @relation("ReviewAuthor")
+  auditEvents           AuditEvent[]       @relation("AuditActor")
+  relatedAuditEvents    AuditEvent[]       @relation("AuditSubject")
+
+  @@index([role, status])
+  @@map("users")
+}
+
+model Profession {
+  id          String                 @id @default(uuid()) @db.Uuid
+  name        String                 @unique @db.VarChar(100)
+  createdAt   DateTime               @default(now()) @map("created_at")
+  profiles    ProfessionalProfile[]
+
+  @@map("professions")
+}
+
+model ProfessionalProfile {
+  id              String                @id @default(uuid()) @db.Uuid
+  userId          String                @unique @map("user_id") @db.Uuid
+  professionId    String                @map("profession_id") @db.Uuid
+  documentType    DocumentType?         @map("document_type")
+  documentNumber  String?               @unique @map("document_number") @db.VarChar(20)
+  bio             String                @db.VarChar(2000)
+  experienceYears Int                   @default(0) @map("experience_years")
+  available       Boolean               @default(true)
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profession      Profession            @relation(fields: [professionId], references: [id], onDelete: Restrict)
+  services        ProfessionalService[]
+  portfolio       PortfolioItem[]
+  requests        ServiceRequest[]
+  reviews         Review[]
+
+  @@index([professionId, available])
+  @@map("professional_profiles")
+}
+
+model ProfessionalService {
+  profileId  String             @map("profile_id") @db.Uuid
+  name       String             @db.VarChar(100)
+  profile    ProfessionalProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, name])
+  @@map("professional_services")
+}
+
+model PortfolioItem {
+  id          String             @id @default(uuid()) @db.Uuid
+  profileId   String             @map("profile_id") @db.Uuid
+  title       String             @db.VarChar(160)
+  imageUrl    String             @map("image_url") @db.VarChar(2048)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  profile     ProfessionalProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("portfolio_items")
+}
+
+model ServiceRequest {
+  id             String         @id @default(uuid()) @db.Uuid
+  clientId       String         @map("client_id") @db.Uuid
+  professionalId String         @map("professional_id") @db.Uuid
+  kind           RequestKind
+  status         RequestStatus  @default(PENDING)
+  description    String         @db.VarChar(3000)
+  desiredDate    DateTime?      @map("desired_date") @db.Date
+  quotedPrice    Decimal?       @map("quoted_price") @db.Decimal(10, 2)
+  attachmentUrl  String?        @map("attachment_url") @db.VarChar(2048)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  client         User           @relation("RequestClient", fields: [clientId], references: [id], onDelete: Restrict)
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+  messages       Message[]
+  review         Review?
+
+  @@index([clientId, status])
+  @@index([professionalId, status])
+  @@map("service_requests")
+}
+
+model Message {
+  id          String         @id @default(uuid()) @db.Uuid
+  senderId    String         @map("sender_id") @db.Uuid
+  receiverId  String         @map("receiver_id") @db.Uuid
+  requestId   String?        @map("request_id") @db.Uuid
+  content     String         @db.VarChar(4000)
+  readAt      DateTime?      @map("read_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  sender      User           @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User           @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  request     ServiceRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  @@index([receiverId, readAt, createdAt])
+  @@index([requestId, createdAt])
+  @@map("messages")
+}
+
+model Review {
+  id             String             @id @default(uuid()) @db.Uuid
+  requestId      String             @unique @map("request_id") @db.Uuid
+  authorId       String             @map("author_id") @db.Uuid
+  professionalId String             @map("professional_id") @db.Uuid
+  rating         Int                @db.SmallInt
+  comment        String             @db.VarChar(2000)
+  createdAt      DateTime           @default(now()) @map("created_at")
+  request        ServiceRequest     @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  author         User               @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Restrict)
+
+  @@index([professionalId, createdAt])
+  @@map("reviews")
+}
+
+model AuditEvent {
+  id             String    @id @default(uuid()) @db.Uuid
+  actorId        String?   @map("actor_id") @db.Uuid
+  subjectUserId  String?   @map("subject_user_id") @db.Uuid
+  action         String    @db.VarChar(160)
+  details        String?   @db.VarChar(2000)
+  flagged        Boolean   @default(false)
+  resolvedAt     DateTime? @map("resolved_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  actor          User?     @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  subjectUser    User?     @relation("AuditSubject", fields: [subjectUserId], references: [id], onDelete: SetNull)
+
+  @@index([flagged, resolvedAt, createdAt])
+  @@map("audit_events")
+}
