@@ -13,6 +13,8 @@ No diretório `Labuta-api`, instale as dependências e crie seu arquivo `.env` c
 
 Configure `DATABASE_URL` para o PostgreSQL e defina um `JWT_SECRET` aleatório com pelo menos 32 caracteres. 
 
+Em produção, use `sslmode=verify-full` na `DATABASE_URL` para validar o certificado TLS do servidor PostgreSQL. Para evitar avisos do driver sem enfraquecer essa validação, a API converte automaticamente `sslmode=prefer`, `require` e `verify-ca` para `verify-full`, exceto quando `uselibpqcompat=true` foi configurado explicitamente.
+
 Para provisionar o usuário administrador, configure também `ADMIN_EMAIL` e `ADMIN_PASSWORD` (mínimo de 12 caracteres). 
 
 A conexão do Prisma CLI é definida em `prisma.config.ts`; em tempo de execução, a API usa o adaptador PostgreSQL `@prisma/adapter-pg`.
