@@ -2,6 +2,6 @@
   "name": "labuta",
   "private": true,
   "scripts": {
-    "start": "node scripts/dev.mjs"
+    "dev": "node scripts/dev.mjs"
   }
 }
