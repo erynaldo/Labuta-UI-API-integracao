@@ -1,5 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api/v1";
-const TOKEN_KEY = "labuta-token";
+/// <reference types="vite/client" />
+
+const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
+const tokenKey = import.meta.env.VITE_TOKEN_KEY ?? "labuta-token";
 
 export interface ApiUser {
   id: string;
@@ -18,12 +20,12 @@ export interface AuthSession {
 }
 
 export function setAuthToken(token: string | null) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
+  if (token) localStorage.setItem(tokenKey, token);
+  else localStorage.removeItem(tokenKey);
 }
 
 export function getAuthToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(tokenKey);
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -32,7 +34,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   const token = getAuthToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const response = await fetch(`${apiUrl}${path}`, { ...options, headers });
   if (!response.ok) {
     const payload = await response.json().catch(() => null) as { error?: string; message?: string } | null;
     throw new Error(payload?.error ?? payload?.message ?? `Falha na requisição (${response.status}).`);

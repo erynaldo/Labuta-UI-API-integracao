@@ -1,6 +1,8 @@
 # Labuta
 
-Aplicação com front-end React/Vite, API Express/Prisma e PostgreSQL.
+Aplicação Web: 
+- Front-end: React + Vite + Tailwind CSS, 
+- Back-end: API Node.js + Express + TypeScript + Prisma ORM e PostgreSQL.
 
 ## Preparação
 
@@ -38,7 +40,7 @@ A documentação da API fica em `http://localhost:3000/api/docs`;
 
 Verifica-se o status da conexão PostgreSQL em `http://localhost:3000/status`.
 
-O front aceita `VITE_API_URL` para sobrescrever o endereço padrão `http://localhost:3000/api/v1`. O CORS da API é configurado por `CORS_ORIGIN` no `.env`.
+O front aceita `VITE_API_URL` para sobrescrever o endereço padrão `http://localhost:3000/api`. O CORS da API é configurado por `CORS_ORIGIN` no `.env`.
 
 ## Build no Render
 

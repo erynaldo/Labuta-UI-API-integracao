@@ -15,6 +15,14 @@ export class AdminService {
     return adminRepository.setUserStatus(id, status, actorId);
   }
 
+  async deleteUser(id: string, actorId: string) {
+    if (id === actorId) throw new AppError("Não é possível excluir a própria conta.", 400);
+    const user = await userRepository.findById(id);
+    if (!user) throw new AppError("Usuário não encontrado.", 404);
+    if (user.role === "ADMIN") throw new AppError("Contas administrativas não podem ser excluídas por esta ação.", 403);
+    await adminRepository.deleteUser(id, actorId);
+  }
+
   async resolveAudit(id: string, actorId: string) {
     try { return await adminRepository.resolveAudit(id, actorId); }
     catch { throw new AppError("Evento de auditoria não encontrado.", 404); }

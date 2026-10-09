@@ -40,6 +40,19 @@ export class AdminRepository {
     });
   }
 
+  deleteUser(id: string, actorId: string) {
+    return prisma.$transaction(async (tx) => {
+      const profile = await tx.professionalProfile.findUnique({ where: { userId: id }, select: { id: true } });
+      const reviewConditions = [{ authorId: id }, ...(profile ? [{ professionalId: profile.id }] : [])];
+      const requestConditions = [{ clientId: id }, ...(profile ? [{ professionalId: profile.id }] : [])];
+
+      await tx.review.deleteMany({ where: { OR: reviewConditions } });
+      await tx.serviceRequest.deleteMany({ where: { OR: requestConditions } });
+      await tx.auditEvent.create({ data: { actorId, subjectUserId: id, action: "USER_DELETED" } });
+      await tx.user.delete({ where: { id } });
+    });
+  }
+
   async resolveAudit(id: string, actorId: string) {
     const event = await prisma.auditEvent.update({ where: { id }, data: { resolvedAt: new Date() } });
     await prisma.auditEvent.create({ data: { actorId, subjectUserId: event.subjectUserId, action: "AUDIT_EVENT_RESOLVED", details: `Evento ${id}` } });

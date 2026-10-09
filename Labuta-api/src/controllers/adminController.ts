@@ -8,5 +8,9 @@ export const listUsers = async (req: Request, res: Response) => res.json(await a
 export const listRequests = async (req: Request, res: Response) => res.json(await adminService.requests(pagination(req).page, pagination(req).limit));
 export const listAudit = async (req: Request, res: Response) => res.json(await adminService.audit(pagination(req).page, pagination(req).limit));
 export const updateUserStatus = async (req: Request, res: Response) => res.json(await adminService.setUserStatus(req.params.id, accountStatusSchema.parse(req.body).status, req.auth!.userId));
+export const deleteUser = async (req: Request, res: Response) => {
+  await adminService.deleteUser(req.params.id, req.auth!.userId);
+  res.status(204).send();
+};
 export const resolveAudit = async (req: Request, res: Response) => res.json(await adminService.resolveAudit(req.params.id, req.auth!.userId));
 export const flagAudit = async (req: Request, res: Response) => res.json(await adminService.flagAudit(req.params.id, auditFlagSchema.parse(req.body).flagged, req.auth!.userId));

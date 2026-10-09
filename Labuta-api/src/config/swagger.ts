@@ -5,7 +5,7 @@ export const swaggerSpec = swaggerJsdoc({
   definition: {
     openapi: "3.0.3",
     info: { title: "Labuta API", version: "1.0.0", description: "API REST da plataforma Labuta para contratação de serviços." },
-    servers: [{ url: `http://localhost:${env.PORT}/api/v1`, description: "Servidor local" }],
+    servers: [{ url: `http://localhost:${env.PORT}/api`, description: "Servidor local" }],
     components: {
       securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" } },
       schemas: {
@@ -38,6 +38,7 @@ export const swaggerSpec = swaggerJsdoc({
       "/reviews": { post: { tags: ["Avaliações"], summary: "Avaliar uma solicitação concluída", security: [{ bearerAuth: [] }], responses: { "201": { description: "Avaliação registrada" }, "409": { description: "Solicitação ainda não concluída ou já avaliada" } } } },
       "/admin/dashboard": { get: { tags: ["Administração"], summary: "Consultar indicadores administrativos", security: [{ bearerAuth: [] }], responses: { "200": { description: "Indicadores" } } } },
       "/admin/users": { get: { tags: ["Administração"], summary: "Listar usuários", security: [{ bearerAuth: [] }], responses: { "200": { description: "Usuários paginados" } } } },
+      "/admin/users/{id}": { delete: { tags: ["Administração"], summary: "Excluir usuário", security: [{ bearerAuth: [] }], parameters: [{ in: "path", name: "id", required: true, schema: { type: "string", format: "uuid" } }], responses: { "204": { description: "Usuário excluído" }, "403": { description: "Conta administrativa protegida" }, "404": { description: "Usuário não encontrado" } } } },
       "/admin/users/{id}/status": { patch: { tags: ["Administração"], summary: "Suspender ou reativar usuário", security: [{ bearerAuth: [] }], parameters: [{ in: "path", name: "id", required: true, schema: { type: "string", format: "uuid" } }], responses: { "200": { description: "Status atualizado" } } } },
       "/admin/requests": { get: { tags: ["Administração"], summary: "Listar solicitações da plataforma", security: [{ bearerAuth: [] }], responses: { "200": { description: "Solicitações paginadas" } } } },
       "/admin/audit": { get: { tags: ["Administração"], summary: "Consultar eventos de auditoria", security: [{ bearerAuth: [] }], responses: { "200": { description: "Eventos paginados" } } } },

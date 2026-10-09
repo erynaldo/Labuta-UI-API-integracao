@@ -7,6 +7,7 @@ import { swaggerSpec } from "./config/swagger.js";
 import { errorHandler } from "./exception/errorHandler.js";
 import { asyncHandler } from "./exception/asyncHandler.js";
 import { prisma } from "./config/prisma.js";
+import { httpLogger } from "./middlewares/httpLogger.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import professionalRoutes from "./routes/professionalRoutes.js";
@@ -19,6 +20,7 @@ export const app = express();
 const allowedOrigins = env.CORS_ORIGIN.split(",").map((origin) => origin.trim());
 
 app.disable("x-powered-by");
+app.use(httpLogger);
 app.use(helmet());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
@@ -39,8 +41,8 @@ api.use("/requests", requestRoutes);
 api.use("/messages", messageRoutes);
 api.use("/reviews", reviewRoutes);
 api.use("/admin", adminRoutes);
-app.use("/api/v1", api);
-app.use("/api", (_req, res) => res.status(200).json({ message: "aplicação rodando" }));
+app.use("/api", api);
+// app.use("/", (_req, res) => res.status(200).json({ message: "aplicação rodando" }));
 
 app.use((_req, res) => res.status(404).json({ error: "Rota não encontrada." }));
 app.use(errorHandler);

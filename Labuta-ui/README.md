@@ -74,4 +74,3 @@
   - 12/09 -> Atualizar as tarefas, sprints no Trello.
   - 12/09 -> Envio da Atividade do SIGAA (arquivo pdf com os links Trello e Repositório).
   
-  ## Novas alterações:

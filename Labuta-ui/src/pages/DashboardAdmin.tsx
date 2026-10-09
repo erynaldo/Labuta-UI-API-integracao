@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, Ban, CheckCircle, Eye, FileText, LogOut, Shield, UserCheck, Users } from "lucide-react";
+import { AlertTriangle, CheckCircle, Eye, FileText, LogOut, Shield, Trash2, UserCheck, Users } from "lucide-react";
 import type { AdminTab, AdminUser, Page } from "../types/types";
 import { apiRequest } from "../api";
 import { AvailBadge, RatingStars } from "../components/shared/others";
@@ -16,6 +16,7 @@ const auditActionLabel: Record<string, string> = {
   REVIEW_CREATED: "Avaliação criada",
   USER_SUSPENDED: "Usuário suspenso",
   USER_REACTIVATED: "Usuário reativado",
+  USER_DELETED: "Usuário excluído",
   AUDIT_EVENT_RESOLVED: "Evento de auditoria resolvido",
   AUDIT_EVENT_FLAGGED: "Evento sinalizado",
   AUDIT_EVENT_UNFLAGGED: "Sinalização removida",
@@ -53,13 +54,13 @@ export function DashboardAdmin({ navigate, onLogout }: { navigate: (p: Page) => 
 
   useEffect(() => { void loadAdminData(); }, []);
 
-  const toggleBan = async (user: AdminUser) => {
-    const status = user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+  const deleteUser = async (user: AdminUser) => {
+    if (!window.confirm(`Tem certeza que deseja excluir o usuário ${user.name}? Esta ação não pode ser desfeita.`)) return;
     try {
-      await apiRequest(`/admin/users/${user.id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+      await apiRequest(`/admin/users/${user.id}`, { method: "DELETE" });
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Não foi possível atualizar o usuário.");
+      setError(requestError instanceof Error ? requestError.message : "Não foi possível excluir o usuário.");
     }
   };
 
@@ -184,12 +185,13 @@ export function DashboardAdmin({ navigate, onLogout }: { navigate: (p: Page) => 
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={() => void toggleBan(u)}
+                            onClick={() => void deleteUser(u)}
                             disabled={u.role === "ADMIN"}
-                            className={`w-20 border border-gray-300 rounded-md px-2 py-1 text-xs flex items-center gap-1 transition-colors font-bold disabled:opacity-40 ${u.status === "ACTIVE" ? "text-red-500 hover:text-red-700 bg-red-100" : "text-green-700 bg-green-100"}`}
+                            title={u.role === "ADMIN" ? "Contas administrativas não podem ser excluídas por esta ação." : "Excluir usuário"}
+                            className="border border-red-300 rounded-md px-2 py-1 text-xs flex items-center gap-1 transition-colors font-bold text-red-600 hover:text-red-800 hover:bg-red-100 disabled:opacity-40"
                           >
-                            <Ban className="w-3.5 h-3.5" />
-                            {u.status === "ACTIVE" ? "Suspender" : "Reativar"}
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Excluir
                           </button>
                         </div>
                       </td>
