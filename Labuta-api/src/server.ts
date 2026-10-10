@@ -3,7 +3,7 @@ import { env } from "./config/env.js";
 import { prisma } from "./config/prisma.js"; 
 
 const server = app.listen(env.PORT, () => {
-  console.info(`Labuta API disponível em http://localhost:${env.PORT}`);
+  console.info(`API disponível em http://localhost:${env.PORT}/api`);
   console.info(`Swagger UI: http://localhost:${env.PORT}/api/docs`);
 });
 
